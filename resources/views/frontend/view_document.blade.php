@@ -5,7 +5,7 @@
 @section('content')
 @php
     $isPdf = \Illuminate\Support\Str::endsWith(strtolower($doc->file_path), '.pdf');
-    $fileUrl = asset('storage/' . $doc->file_path);
+    $fileUrl = route('verify.file', $doc->uuid);
 @endphp
 <section class="min-h-[70vh] bg-slate-50 py-12 sm:py-16">
     <div class="mx-auto max-w-5xl px-5 sm:px-6 lg:px-8">

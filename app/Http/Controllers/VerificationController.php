@@ -55,4 +55,31 @@ class VerificationController extends Controller
 
         return view('frontend.view_document', compact('doc'));
     }
+
+    public function streamFile($uuid)
+    {
+        $doc = VerificationDocument::where('uuid', $uuid)->first();
+
+        if (! $doc || ! $doc->is_active || ($doc->expires_at && $doc->expires_at->isPast())) {
+            return response()->view('errors.document_expired', [], 403);
+        }
+
+        $path = storage_path('app/public/' . $doc->file_path);
+
+        if (! file_exists($path)) {
+            $altPath = storage_path('app/' . $doc->file_path);
+            if (file_exists($altPath)) {
+                $path = $altPath;
+            } else {
+                abort(404, 'Document file not found on server.');
+            }
+        }
+
+        $mimeType = mime_content_type($path) ?: 'application/octet-stream';
+
+        return response()->file($path, [
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'inline; filename="' . basename($doc->file_path) . '"',
+        ]);
+    }
 }

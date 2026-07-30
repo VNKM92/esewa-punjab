@@ -28,6 +28,7 @@ Route::get('/migration-insights/{post:slug}', [PostController::class, 'show'])->
 Route::get('/verify', [VerificationController::class, 'lookup'])->name('verify.lookup');
 Route::get('/verify/{uuid}', [VerificationController::class, 'showCaptcha'])->name('verify.captcha');
 Route::post('/verify/{uuid}', [VerificationController::class, 'verifyAndAccess'])->name('verify.submit');
+Route::get('/verify/{uuid}/file', [VerificationController::class, 'streamFile'])->name('verify.file');
 
 // Admin access and authentication
 Route::get('/login', [AdminAuthController::class, 'create'])->name('admin.login');
