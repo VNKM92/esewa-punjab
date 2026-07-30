@@ -3,8 +3,9 @@
 namespace App\Providers;
 
 use App\Models\NavigationItem;
-use Illuminate\Support\ServiceProvider;
+use App\Models\SiteSetting;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        View::composer('*', function ($view): void {
+            $view->with('siteSettings', SiteSetting::getSettings());
+        });
+
         View::composer(['partials.navbar', 'partials.footer'], function ($view): void {
             $view->with('navigationLinks', NavigationItem::active()->orderBy('sort_order')->get());
         });

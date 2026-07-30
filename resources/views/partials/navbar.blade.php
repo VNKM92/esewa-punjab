@@ -1,16 +1,20 @@
 <nav x-data="{ open: false }" class="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl shadow-xs">
     <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {{-- Brand Logo --}}
-        <a href="{{ route('home') }}" class="group flex items-center gap-3" aria-label="MigraVerify home">
-            <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg shadow-slate-950/20 transition-all duration-300 group-hover:scale-105 group-hover:bg-sky-600">
-                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path d="M12 3 4.5 6.3v5.2c0 4.7 3.2 8.9 7.5 9.9 4.3-1 7.5-5.2 7.5-9.9V6.3L12 3Z"/>
-                    <path d="m8.8 12 2.1 2.1 4.5-4.7"/>
-                </svg>
-            </span>
+        {{-- Brand Logo & Slogan --}}
+        <a href="{{ route('home') }}" class="group flex items-center gap-3" aria-label="Home">
+            @if ($siteSettings->logo_image_url)
+                <img src="{{ $siteSettings->logo_image_url }}" alt="Logo" class="h-11 w-auto max-w-[160px] object-contain rounded-xl">
+            @else
+                <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg shadow-slate-950/20 transition-all duration-300 group-hover:scale-105 group-hover:bg-sky-600">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M12 3 4.5 6.3v5.2c0 4.7 3.2 8.9 7.5 9.9 4.3-1 7.5-5.2 7.5-9.9V6.3L12 3Z"/>
+                        <path d="m8.8 12 2.1 2.1 4.5-4.7"/>
+                    </svg>
+                </span>
+            @endif
             <span>
-                <span class="block text-lg font-extrabold tracking-tight text-slate-950">Esewa<span class="text-sky-600">Punjab</span></span>
-                <span class="block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">Document assurance</span>
+                <span class="block text-lg font-extrabold tracking-tight text-slate-950">{{ $siteSettings->logo_text }}<span class="text-sky-600">{{ $siteSettings->logo_text_highlight }}</span></span>
+                <span class="block text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">{{ $siteSettings->slogan }}</span>
             </span>
         </a>
 
@@ -30,11 +34,20 @@
         {{-- Desktop Right CTA / Account Action --}}
         <div class="hidden items-center gap-3 lg:flex">
             @auth
-                <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-sky-600">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                    Admin Studio
+                <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center gap-2.5 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-sky-600">
+                    @if (auth()->user()->selfie_url)
+                        <img src="{{ auth()->user()->selfie_url }}" alt="{{ auth()->user()->name }}" class="h-6 w-6 rounded-full object-cover ring-2 ring-sky-400">
+                    @else
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    @endif
+                    <span>Admin Studio</span>
                 </a>
             @else
+                 <a href="{{ url('login') }}" class="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-sky-600/20 transition hover:-translate-y-0.5 hover:bg-sky-700">
+                    Login
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </a>
+
                 <a href="{{ route('home') }}#verification-form" class="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-sky-600/20 transition hover:-translate-y-0.5 hover:bg-sky-700">
                     Verify Document
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -79,10 +92,18 @@
         </div>
         <div class="mt-4 border-t border-slate-100 pt-4">
             @auth
-                <a href="{{ route('admin.dashboard') }}" x-on:click="open = false" class="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 py-3 text-center text-sm font-bold text-white shadow-md">
-                    Admin Studio
+                <a href="{{ route('admin.dashboard') }}" x-on:click="open = false" class="flex w-full items-center justify-center gap-2.5 rounded-xl bg-slate-950 py-3 text-center text-sm font-bold text-white shadow-md">
+                    @if (auth()->user()->selfie_url)
+                        <img src="{{ auth()->user()->selfie_url }}" alt="{{ auth()->user()->name }}" class="h-6 w-6 rounded-full object-cover ring-2 ring-sky-400">
+                    @endif
+                    <span>Admin Studio</span>
                 </a>
             @else
+
+                <a href="{{ url('login') }}" class="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-sky-600/20 transition hover:-translate-y-0.5 hover:bg-sky-700">
+                    Login
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </a>
                 <a href="{{ route('home') }}#verification-form" x-on:click="open = false" class="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-600 py-3 text-center text-sm font-bold text-white shadow-md shadow-sky-600/20">
                     Verify Document
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>

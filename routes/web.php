@@ -4,6 +4,8 @@ use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminContentController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminPostController;
+use App\Http\Controllers\AdminProfileController;
+use App\Http\Controllers\AdminSettingsController;
 use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
@@ -42,6 +44,10 @@ Route::prefix('admin')->middleware('guest')->group(function () {
 
 Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/profile', [AdminProfileController::class, 'edit'])->name('admin.profile.edit');
+    Route::put('/profile', [AdminProfileController::class, 'update'])->name('admin.profile.update');
+    Route::get('/settings', [AdminSettingsController::class, 'edit'])->name('admin.settings.edit');
+    Route::put('/settings', [AdminSettingsController::class, 'update'])->name('admin.settings.update');
     Route::get('/change-password', [ChangePasswordController::class, 'edit'])->name('admin.password.change');
     Route::put('/change-password', [ChangePasswordController::class, 'update'])->name('admin.password.update');
     Route::post('/documents', [AdminController::class, 'storeDocument'])->name('admin.doc.store');
