@@ -53,6 +53,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::put('/change-password', [ChangePasswordController::class, 'update'])->name('admin.password.update');
     Route::post('/documents', [AdminController::class, 'storeDocument'])->name('admin.doc.store');
     Route::post('/documents/{id}/toggle', [AdminController::class, 'toggleVisibility'])->name('admin.doc.toggle');
+    Route::delete('/documents/{id}/soft-delete', [AdminController::class, 'softDeleteDocument'])->name('admin.doc.soft_delete');
+    Route::post('/documents/{id}/restore', [AdminController::class, 'restoreDocument'])->name('admin.doc.restore');
+    Route::delete('/documents/{id}/force-delete', [AdminController::class, 'forceDeleteDocument'])->name('admin.doc.force_delete');
     Route::delete('/messages/{id}', [AdminController::class, 'destroyMessage'])->name('admin.messages.destroy');
     Route::post('/logout', [AdminAuthController::class, 'destroy'])->name('admin.logout');
     Route::get('/content', [AdminContentController::class, 'index'])->name('admin.content.index');

@@ -157,12 +157,30 @@
                                         </div>
                                     </td>
                                     <td class="px-5 py-4">
-                                        <form action="{{ route('admin.doc.toggle', $doc->id) }}" method="POST">
-                                            @csrf
-                                            <button class="rounded-xl border px-3 py-2 text-xs font-bold transition {{ $doc->is_active ? 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
-                                                {{ $doc->is_active ? 'Revoke Permission' : 'Grant Permission' }}
-                                            </button>
-                                        </form>
+                                        <div class="flex flex-col gap-2">
+                                            <form action="{{ route('admin.doc.toggle', $doc->id) }}" method="POST">
+                                                @csrf
+                                                <button class="w-full rounded-xl border px-3 py-1.5 text-xs font-bold transition {{ $doc->is_active ? 'border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
+                                                    {{ $doc->is_active ? 'Revoke Permission' : 'Grant Permission' }}
+                                                </button>
+                                            </form>
+                                            
+                                            <form action="{{ route('admin.doc.soft_delete', $doc->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" onclick="return confirm('Soft delete this document? The file will stay in server storage, but verification link will be disabled.')" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 transition">
+                                                    Soft Delete
+                                                </button>
+                                            </form>
+
+                                            <form action="{{ route('admin.doc.force_delete', $doc->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" onclick="return confirm('PERMANENTLY DELETE document? This will delete the database record AND remove the file from server storage!')" class="w-full rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100 transition">
+                                                    Hard Delete
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -175,6 +193,67 @@
                 </div>
             </section>
         </div>
+
+        @if ($trashedCount > 0)
+            <section class="mt-8 overflow-hidden rounded-2xl border border-amber-200 bg-white shadow-sm">
+                <div class="flex flex-col gap-3 border-b border-amber-100 bg-amber-50/50 p-6 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-amber-950 flex items-center gap-2">
+                            <svg class="h-5 w-5 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                            Trashed Documents (Soft-Deleted)
+                        </h2>
+                        <p class="mt-1 text-sm text-amber-800">These documents are soft-deleted. Verification links are disabled, but the physical files are still stored safely on the server.</p>
+                    </div>
+                    <span class="rounded-xl bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-900">{{ $trashedCount }} in trash</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-[760px] w-full text-left text-sm">
+                        <thead class="bg-amber-50/30 text-xs font-bold uppercase tracking-[0.08em] text-amber-800">
+                            <tr>
+                                <th class="px-5 py-4">Document Details</th>
+                                <th class="px-5 py-4">Deleted Date</th>
+                                <th class="px-5 py-4">Storage File</th>
+                                <th class="px-5 py-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-amber-100/50">
+                            @foreach ($trashedDocuments as $doc)
+                                <tr>
+                                    <td class="px-5 py-4">
+                                        <p class="font-bold text-slate-900">{{ $doc->title }}</p>
+                                        <p class="mt-0.5 text-xs text-slate-500">{{ $doc->applicant_name }} &middot; {{ $doc->document_type }}</p>
+                                        <p class="mt-1 font-mono text-[11px] text-slate-400">UUID: {{ $doc->uuid }}</p>
+                                    </td>
+                                    <td class="px-5 py-4 text-xs font-semibold text-amber-900">
+                                        {{ $doc->deleted_at ? $doc->deleted_at->format('M d, Y H:i') : 'N/A' }}
+                                    </td>
+                                    <td class="px-5 py-4 text-xs font-mono text-slate-500">
+                                        {{ $doc->file_path }}
+                                    </td>
+                                    <td class="px-5 py-4">
+                                        <div class="flex items-center gap-2">
+                                            <form action="{{ route('admin.doc.restore', $doc->id) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition">
+                                                    Restore
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('admin.doc.force_delete', $doc->id) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" onclick="return confirm('Permanently delete record AND delete physical file from server storage?')" class="rounded-xl border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100 transition">
+                                                    Hard Delete (Remove File)
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        @endif
     </div>
 </section>
 @endsection

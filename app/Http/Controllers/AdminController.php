@@ -6,6 +6,7 @@ use App\Models\ContactMessage;
 use App\Models\PageView;
 use App\Models\VerificationDocument;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AdminController extends Controller
@@ -25,8 +26,10 @@ class AdminController extends Controller
 
         return view('admin.dashboard', [
             'documents' => VerificationDocument::latest()->get(),
+            'trashedDocuments' => VerificationDocument::onlyTrashed()->latest()->get(),
             'totalDocuments' => VerificationDocument::count(),
             'activeDocuments' => VerificationDocument::where('is_active', true)->count(),
+            'trashedCount' => VerificationDocument::onlyTrashed()->count(),
             'totalScans' => VerificationDocument::sum('view_count'),
             'totalVisits' => PageView::count(),
             'uniqueVisitors' => PageView::distinct('ip_address')->count('ip_address'),
@@ -70,6 +73,35 @@ class AdminController extends Controller
         $document->update(['is_active' => ! $document->is_active]);
 
         return back()->with('success', 'Document visibility updated.');
+    }
+
+    public function softDeleteDocument(int $id)
+    {
+        $document = VerificationDocument::findOrFail($id);
+        $document->delete();
+
+        return back()->with('success', 'Document soft-deleted (moved to trash). File remains safely in storage.');
+    }
+
+    public function restoreDocument(int $id)
+    {
+        $document = VerificationDocument::withTrashed()->findOrFail($id);
+        $document->restore();
+
+        return back()->with('success', 'Document restored successfully from trash.');
+    }
+
+    public function forceDeleteDocument(int $id)
+    {
+        $document = VerificationDocument::withTrashed()->findOrFail($id);
+
+        if ($document->file_path && Storage::disk('public')->exists($document->file_path)) {
+            Storage::disk('public')->delete($document->file_path);
+        }
+
+        $document->forceDelete();
+
+        return back()->with('success', 'Document database record and physical file permanently deleted.');
     }
 
     public function destroyMessage(int $id)
